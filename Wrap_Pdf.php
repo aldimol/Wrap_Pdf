@@ -468,6 +468,9 @@ class Wrap_Pdf
             }
             else
             {
+				// псевдо выравнивание по ширине
+				$lineText = $this->ret_width($lineText, $width, ' ');
+                
                 // Looks like the line is going to consume the maximum available width, so we'll deal with justification
                 // and then write the line of text out. For efficiency reasons the code above that calcualtes the line
                 // widths always includes the width of an extra space at the end. This is fine for left justified text,
@@ -667,5 +670,30 @@ class Wrap_Pdf
     {
         return $this->currentPage;
     }
+	public function ret_width ($subject, $width, $ch)
+	{
+		$lT = rtrim($subject);
+		$lW = $this->getStringWidth( $lT );
+		$sp = $this->getStringWidth( $ch );
+		$dsp = $width - $lW;
+		$c_sp = substr_count($lT, $ch);
+		$c_add_sp = intval($dsp / $sp) + $c_sp;
+		$arr = explode($ch, $lT);
+		$next = intval($c_add_sp / $c_sp);
+		$prev = $c_add_sp - $c_sp * $next;
+		$narr[0] = array_slice ($arr, 0, $prev);
+		$narr[1] = array_slice ($arr, $prev);
+		$lTe = implode($this->sim_rep($ch, $next + 1), $narr[0]) . $this->sim_rep($ch, $next) . implode($this->sim_rep($ch, $next), $narr[1]);
+		return $lTe;
+	}	
+	
+	public function sim_rep ($ch, $c)
+	{
+		$sch = '';
+		for ($i = 0; $i < $c; $i++) {
+			$sch = $sch . $ch;
+		}
+		return $sch;
+	}    
 }
 ?>
